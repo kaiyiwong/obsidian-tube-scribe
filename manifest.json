@@ -5,6 +5,6 @@
   "minAppVersion": "1.0.0",
   "description": "Generate YouTube metadata (titles, descriptions, tags) from your video notes using Claude AI with web research.",
   "author": "Kaiyi Wong",
-  "authorUrl": "https://github.com/kaibear",
-  "isDesktopOnly": false
+  "authorUrl": "https://github.com/kaiyiwong",
+  "isDesktopOnly": true
 }

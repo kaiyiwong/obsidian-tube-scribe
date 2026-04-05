@@ -76,6 +76,14 @@ akihabara, tokyo walk, japan night walk, electric town, anime district, ...
 | Language Output | English only, English + Japanese, or Japanese only |
 | Number of Titles | 1–5 title options |
 | Number of Tags | 5–30 tags |
+| Model | Claude Haiku (budget) or Sonnet (premium) |
+| Web Search | Toggle live trend research on/off |
+| Timestamps | Add chapter timestamp placeholders to descriptions |
+| Links Section | Add subscribe/social link placeholders to descriptions |
+
+## Network & Privacy
+
+This plugin connects to **`api.anthropic.com`** (Anthropic's API) to generate metadata. An [Anthropic API key](https://console.anthropic.com) is required, which is a paid service. Your API key is stored locally in Obsidian's plugin data and is only sent to Anthropic's servers. No other network requests are made. No telemetry or analytics are collected.
 
 ## License
 
