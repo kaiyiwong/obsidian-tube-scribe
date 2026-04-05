@@ -7,6 +7,10 @@ export interface TubeScribeSettings {
   languageOutput: "en" | "en+jp" | "jp";
   titleCount: number;
   tagCount: number;
+  includeTimestamps: boolean;
+  includeLinks: boolean;
+  useWebSearch: boolean;
+  model: "sonnet" | "haiku";
 }
 
 export const DEFAULT_SETTINGS: TubeScribeSettings = {
@@ -16,6 +20,10 @@ export const DEFAULT_SETTINGS: TubeScribeSettings = {
   languageOutput: "en+jp",
   titleCount: 3,
   tagCount: 15,
+  includeTimestamps: false,
+  includeLinks: false,
+  useWebSearch: false,
+  model: "haiku",
 };
 
 export class TubeScribeSettingTab extends PluginSettingTab {
@@ -24,6 +32,14 @@ export class TubeScribeSettingTab extends PluginSettingTab {
   constructor(app: App, plugin: TubeScribePlugin) {
     super(app, plugin);
     this.plugin = plugin;
+  }
+
+  getCostEstimate(): string {
+    const { model, useWebSearch } = this.plugin.settings;
+    if (model === "haiku" && !useWebSearch) return "Estimated cost: ~$0.01/run (500 runs per $5)";
+    if (model === "haiku" && useWebSearch) return "Estimated cost: ~$0.04/run (125 runs per $5)";
+    if (model === "sonnet" && !useWebSearch) return "Estimated cost: ~$0.05/run (100 runs per $5)";
+    return "Estimated cost: ~$0.15/run (33 runs per $5)";
   }
 
   display(): void {
@@ -110,6 +126,81 @@ export class TubeScribeSettingTab extends PluginSettingTab {
           .setDynamicTooltip()
           .onChange(async (value) => {
             this.plugin.settings.tagCount = value;
+            await this.plugin.saveSettings();
+          });
+      });
+
+    // Cost & Performance section
+    containerEl.createEl("h3", { text: "Cost & Performance" });
+
+    const costEstimate = this.getCostEstimate();
+    const costEl = containerEl.createEl("p", {
+      text: costEstimate,
+      cls: "setting-item-description",
+    });
+    costEl.style.marginBottom = "12px";
+    costEl.style.fontWeight = "bold";
+
+    // Model
+    new Setting(containerEl)
+      .setName("Model")
+      .setDesc(
+        "Haiku: fast, great for everyday use (~$0.01/run). Sonnet: stronger Japanese writing and more creative titles (~$0.05/run). Upgrade to Sonnet when you need polished JP descriptions."
+      )
+      .addDropdown((drop) => {
+        drop
+          .addOption("haiku", "Claude Haiku (default)")
+          .addOption("sonnet", "Claude Sonnet (premium)")
+          .setValue(this.plugin.settings.model)
+          .onChange(async (value) => {
+            this.plugin.settings.model = value as "sonnet" | "haiku";
+            await this.plugin.saveSettings();
+            costEl.setText(this.getCostEstimate());
+          });
+      });
+
+    // Web Search
+    new Setting(containerEl)
+      .setName("Web Search")
+      .setDesc(
+        "Searches YouTube for current competitor titles and trending keywords. Best for events (AnimeJapan, cherry blossom season) or unfamiliar locations. Adds ~$0.03-0.10/run."
+      )
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.plugin.settings.useWebSearch)
+          .onChange(async (value) => {
+            this.plugin.settings.useWebSearch = value;
+            await this.plugin.saveSettings();
+            costEl.setText(this.getCostEstimate());
+          });
+      });
+
+    // Include Timestamps
+    new Setting(containerEl)
+      .setName("Include Timestamp Placeholders")
+      .setDesc(
+        "Add suggested chapter timestamps in the description (you fill in the actual times)."
+      )
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.plugin.settings.includeTimestamps)
+          .onChange(async (value) => {
+            this.plugin.settings.includeTimestamps = value;
+            await this.plugin.saveSettings();
+          });
+      });
+
+    // Include Links
+    new Setting(containerEl)
+      .setName("Include Links Section")
+      .setDesc(
+        "Add a links section in the description (subscribe, social, related videos)."
+      )
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.plugin.settings.includeLinks)
+          .onChange(async (value) => {
+            this.plugin.settings.includeLinks = value;
             await this.plugin.saveSettings();
           });
       });

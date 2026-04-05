@@ -25,17 +25,21 @@ interface AnthropicResponse {
 }
 
 function buildSystemPrompt(settings: TubeScribeSettings): string {
+  const searchBlock = settings.useWebSearch
+    ? `You have access to web search. Do 1-2 focused searches to:
+- Find what top-performing similar videos are titled (study the patterns)
+- Identify high-volume search terms for this specific topic/location
+
+Keep searches targeted — do not do more than 2 searches.`
+    : `You do NOT have web search for this run. Use your knowledge of YouTube SEO, walking video trends, and Japan tourism keywords to generate the best metadata possible.`;
+
   return `You are a YouTube SEO specialist for a Japan walking video channel.
 
 Channel context: ${settings.channelContext}
 
 Your job is to generate YouTube metadata that maximizes discoverability while staying authentic to the channel's voice.
 
-You have access to web search. Do 1-2 focused searches to:
-- Find what top-performing similar videos are titled (study the patterns)
-- Identify high-volume search terms for this specific topic/location
-
-Keep searches targeted — do not do more than 2 searches.
+${searchBlock}
 
 Always respond with a valid JSON object only — no markdown, no preamble, no explanation.`;
 }
@@ -46,20 +50,31 @@ function buildUserPrompt(
 ): string {
   const { titleCount, tagCount, languageOutput } = settings;
 
+  const descriptionExtras: string[] = [];
+  if (settings.includeTimestamps) {
+    descriptionExtras.push("Include a Timestamps/Chapters section with 4-6 placeholder entries like '0:00 - Start / Arrival at [location]', '2:30 - [landmark or scene]'. Use realistic intervals for a walking video.");
+  }
+  if (settings.includeLinks) {
+    descriptionExtras.push("End with a Links section containing placeholders: Subscribe link, social media, and 2-3 related video suggestions.");
+  }
+  const extrasBlock = descriptionExtras.length > 0
+    ? "\n\nDescription extras:\n" + descriptionExtras.map(e => `- ${e}`).join("\n")
+    : "";
+
   return `Generate YouTube metadata for this video note:
 
 ---
 ${noteContent}
 ---
 
-Do 1-2 web searches to research top-performing titles and search terms for this topic, then generate metadata.
+${settings.useWebSearch ? "Do 1-2 web searches to research top-performing titles and search terms for this topic, then generate metadata." : "Generate metadata based on your knowledge of YouTube SEO and this niche."}
 
 Return a JSON object with exactly this shape:
 {
   "titles": [${titleCount} title options, ranked by estimated search performance],
-  "descriptionEn": ${languageOutput !== "jp" ? '"SEO description in English. First 2 lines must hook viewers (visible before Show More). Include location, what viewers will experience, and natural keywords. 150-250 words total. End with a subscribe nudge."' : '""'},
+  "descriptionEn": ${languageOutput !== "jp" ? '"SEO description in English. First 2 lines must hook viewers (visible before Show More). Include location, what viewers will experience, and natural keywords. 150-250 words total."' : '""'},
   "descriptionJp": ${languageOutput !== "en" ? '"SEO description in Japanese — written natively for JP YouTube audience, not translated from English. First 2 lines are the hook. 150-250 words. Use natural Japanese phrasing."' : '""'},
-  "tags": [${tagCount} tags — lead with long-tail keywords (e.g. "walking tour Shimokitazawa 2024"), then broader terms. Include alternate romanizations for JP locations. No # prefix]
+  "tags": [${tagCount} tags — include BOTH English and Japanese for each location/term (e.g. "shibuya", "渋谷"). Lead with long-tail keywords (e.g. "walking tour Shimokitazawa 2024"), then broader terms. Include alternate romanizations. No # prefix]
 }
 
 Title rules:
@@ -68,7 +83,7 @@ Title rules:
 - Include markers like [4K] [Walking Tour] where relevant
 - Study what the web search found — mirror patterns from high-view videos
 - Feel written by a human, not an algorithm
-
+${extrasBlock}
 Return only the JSON object. No markdown fences. No explanation.`;
 }
 
@@ -87,7 +102,11 @@ export async function runPipeline(
     throw new Error("Note is empty. Add some content about your video first.");
   }
 
-  onProgress("Researching topic and trends...");
+  onProgress(settings.useWebSearch ? "Researching topic and trends..." : "Generating metadata...");
+
+  const modelId = settings.model === "haiku"
+    ? "claude-haiku-4-5-20251001"
+    : "claude-sonnet-4-20250514";
 
   const messages: AnthropicMessage[] = [
     {
@@ -96,18 +115,21 @@ export async function runPipeline(
     },
   ];
 
-  const requestBody = {
-    model: "claude-sonnet-4-20250514",
+  const requestBody: Record<string, unknown> = {
+    model: modelId,
     max_tokens: 2000,
     system: buildSystemPrompt(settings),
-    tools: [
+    messages,
+  };
+
+  if (settings.useWebSearch) {
+    requestBody.tools = [
       {
         type: "web_search_20250305",
         name: "web_search",
       },
-    ],
-    messages,
-  };
+    ];
+  }
 
   onProgress("Generating metadata with Claude...");
 
