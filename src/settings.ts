@@ -15,8 +15,7 @@ export interface TubeScribeSettings {
 
 export const DEFAULT_SETTINGS: TubeScribeSettings = {
   anthropicApiKey: "",
-  channelContext:
-    "Silent walking videos across Tokyo neighborhoods, events, and daily life in Japan.",
+  channelContext: "",
   languageOutput: "en+jp",
   titleCount: 3,
   tagCount: 15,
@@ -163,7 +162,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Web Search")
       .setDesc(
-        "Searches YouTube for current competitor titles and trending keywords. Best for events (AnimeJapan, cherry blossom season) or unfamiliar locations. Adds ~$0.03-0.10/run."
+        "Searches for current competitor titles and trending keywords. Best for events, seasonal content, or uncommon topics. Adds ~$0.03-0.10/run."
       )
       .addToggle((toggle) => {
         toggle
