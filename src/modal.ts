@@ -1,5 +1,105 @@
 import { App, Modal, Setting } from "obsidian";
 import type { PipelineResult } from "./pipeline";
+import type { TubeScribeSettings } from "./settings";
+import { getCostColorClass } from "./settings";
+
+interface RunOptions {
+  model: "sonnet" | "haiku";
+  useWebSearch: boolean;
+}
+
+function getCostValue(model: string, useWebSearch: boolean): string {
+  if (model === "haiku" && !useWebSearch) return "~$0.01";
+  if (model === "haiku" && useWebSearch) return "~$0.04";
+  if (model === "sonnet" && !useWebSearch) return "~$0.05";
+  return "~$0.15";
+}
+
+export class ConfirmModal extends Modal {
+  private onConfirm: (options: RunOptions) => void;
+  private options: RunOptions;
+
+  constructor(app: App, settings: TubeScribeSettings, onConfirm: (options: RunOptions) => void) {
+    super(app);
+    this.onConfirm = onConfirm;
+    this.options = {
+      model: settings.model,
+      useWebSearch: settings.useWebSearch,
+    };
+  }
+
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+
+    new Setting(contentEl).setName("Generate metadata?").setHeading();
+
+    // Cost display with colored value
+    const costLine = contentEl.createEl("p", {
+      cls: "tube-scribe-cost-estimate",
+    });
+
+    const updateCostDisplay = () => {
+      costLine.empty();
+      const { model, useWebSearch } = this.options;
+      const modelLabel = model === "haiku" ? "Haiku" : "Sonnet";
+      const searchLabel = useWebSearch ? " + web search" : "";
+      costLine.appendText(`${modelLabel}${searchLabel} — estimated cost: `);
+      costLine.createEl("span", {
+        text: getCostValue(model, useWebSearch),
+        cls: ["tube-scribe-cost-value", getCostColorClass(model, useWebSearch)],
+      });
+    };
+
+    updateCostDisplay();
+
+    // Model toggle
+    new Setting(contentEl)
+      .setName("Model")
+      .addDropdown((drop) => {
+        drop
+          .addOption("haiku", "Haiku")
+          .addOption("sonnet", "Sonnet")
+          .setValue(this.options.model)
+          .onChange((value) => {
+            this.options.model = value as "sonnet" | "haiku";
+            updateCostDisplay();
+          });
+      });
+
+    // Web search toggle
+    new Setting(contentEl)
+      .setName("Web search")
+      .addToggle((toggle) => {
+        toggle
+          .setValue(this.options.useWebSearch)
+          .onChange((value) => {
+            this.options.useWebSearch = value;
+            updateCostDisplay();
+          });
+      });
+
+    new Setting(contentEl)
+      .addButton((btn) => {
+        btn
+          .setButtonText("Generate")
+          .setCta()
+          .onClick(() => {
+            this.close();
+            this.onConfirm(this.options);
+          });
+      })
+      .addButton((btn) => {
+        btn.setButtonText("Cancel").onClick(() => {
+          this.close();
+        });
+      });
+  }
+
+  onClose() {
+    this.contentEl.empty();
+  }
+}
 
 export class ProgressModal extends Modal {
   private messageEl: HTMLElement;

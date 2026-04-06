@@ -2,7 +2,7 @@ import { Notice, Plugin, TFile } from "obsidian";
 import { DEFAULT_SETTINGS, TubeScribeSettingTab } from "./settings";
 import type { TubeScribeSettings } from "./settings";
 import { runPipeline, formatMetadataBlock } from "./pipeline";
-import { ProgressModal, ResultModal } from "./modal";
+import { ConfirmModal, ProgressModal, ResultModal } from "./modal";
 
 export default class TubeScribePlugin extends Plugin {
   settings: TubeScribeSettings;
@@ -22,7 +22,7 @@ export default class TubeScribePlugin extends Plugin {
         if (!file) return false;
         if (checking) return true;
 
-        void this.runMetadataPipeline(file);
+        this.confirmAndRun(file);
         return true;
       },
     });
@@ -34,7 +34,7 @@ export default class TubeScribePlugin extends Plugin {
         new Notice("TubeScribe: No active note open.");
         return;
       }
-      void this.runMetadataPipeline(file);
+      this.confirmAndRun(file);
     });
   }
 
@@ -46,7 +46,7 @@ export default class TubeScribePlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  private async runMetadataPipeline(file: TFile) {
+  private confirmAndRun(file: TFile) {
     if (!this.settings.anthropicApiKey) {
       new Notice(
         "TubeScribe: Please set your Anthropic API key in settings first.",
@@ -55,6 +55,14 @@ export default class TubeScribePlugin extends Plugin {
       return;
     }
 
+    new ConfirmModal(this.app, this.settings, (options) => {
+      const runSettings = { ...this.settings, ...options };
+      void this.runMetadataPipeline(file, runSettings);
+    }).open();
+  }
+
+  private async runMetadataPipeline(file: TFile, runSettings?: TubeScribeSettings) {
+    const settings = runSettings ?? this.settings;
     const progressModal = new ProgressModal(this.app);
     progressModal.open();
 
@@ -63,7 +71,7 @@ export default class TubeScribePlugin extends Plugin {
 
       const result = await runPipeline(
         noteContent,
-        this.settings,
+        settings,
         (msg: string) => {
           progressModal.setMessage(msg);
         }

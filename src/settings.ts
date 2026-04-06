@@ -25,6 +25,13 @@ export const DEFAULT_SETTINGS: TubeScribeSettings = {
   model: "haiku",
 };
 
+export function getCostColorClass(model: string, useWebSearch: boolean): string {
+  if (model === "haiku" && !useWebSearch) return "tube-scribe-cost-green";
+  if (model === "haiku" && useWebSearch) return "tube-scribe-cost-yellow";
+  if (model === "sonnet" && !useWebSearch) return "tube-scribe-cost-yellow";
+  return "tube-scribe-cost-red";
+}
+
 export class TubeScribeSettingTab extends PluginSettingTab {
   plugin: TubeScribePlugin;
 
@@ -33,12 +40,12 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  getCostEstimate(): string {
+  getCostDetails(): { value: string; runsPerFive: string } {
     const { model, useWebSearch } = this.plugin.settings;
-    if (model === "haiku" && !useWebSearch) return "Estimated cost: ~$0.01/run (500 runs per $5)";
-    if (model === "haiku" && useWebSearch) return "Estimated cost: ~$0.04/run (125 runs per $5)";
-    if (model === "sonnet" && !useWebSearch) return "Estimated cost: ~$0.05/run (100 runs per $5)";
-    return "Estimated cost: ~$0.15/run (33 runs per $5)";
+    if (model === "haiku" && !useWebSearch) return { value: "~$0.01", runsPerFive: "500" };
+    if (model === "haiku" && useWebSearch) return { value: "~$0.04", runsPerFive: "125" };
+    if (model === "sonnet" && !useWebSearch) return { value: "~$0.05", runsPerFive: "100" };
+    return { value: "~$0.15", runsPerFive: "33" };
   }
 
   display(): void {
@@ -132,11 +139,23 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     // Cost & Performance section
     new Setting(containerEl).setName("Cost & performance").setHeading();
 
-    const costEstimate = this.getCostEstimate();
     const costEl = containerEl.createEl("p", {
-      text: costEstimate,
       cls: ["setting-item-description", "tube-scribe-cost-estimate"],
     });
+
+    const updateCostDisplay = () => {
+      const { model, useWebSearch } = this.plugin.settings;
+      const { value, runsPerFive } = this.getCostDetails();
+      costEl.empty();
+      costEl.appendText("Estimated cost: ");
+      costEl.createEl("span", {
+        text: `${value}/run`,
+        cls: ["tube-scribe-cost-value", getCostColorClass(model, useWebSearch)],
+      });
+      costEl.appendText(` (${runsPerFive} runs per $5)`);
+    };
+
+    updateCostDisplay();
 
     // Model
     new Setting(containerEl)
@@ -152,7 +171,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.model = value as "sonnet" | "haiku";
             await this.plugin.saveSettings();
-            costEl.setText(this.getCostEstimate());
+            updateCostDisplay();
           });
       });
 
@@ -168,7 +187,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.useWebSearch = value;
             await this.plugin.saveSettings();
-            costEl.setText(this.getCostEstimate());
+            updateCostDisplay();
           });
       });
 

@@ -52,3 +52,25 @@
   margin-bottom: 12px;
   font-weight: bold;
 }
+
+/* Cost value */
+.tube-scribe-cost-value {
+  font-weight: bold;
+}
+
+/* Cost color coding */
+.tube-scribe-cost-green {
+  color: #2e8b57;
+}
+
+.tube-scribe-cost-yellow {
+  color: #b8860b;
+}
+
+.tube-scribe-cost-orange {
+  color: #d2691e;
+}
+
+.tube-scribe-cost-red {
+  color: #cc3333;
+}
