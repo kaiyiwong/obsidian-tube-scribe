@@ -10,7 +10,7 @@ interface RunOptions {
 
 function getCostValue(model: string, useWebSearch: boolean): string {
   if (model === "haiku" && !useWebSearch) return "~$0.01";
-  if (model === "haiku" && useWebSearch) return "~$0.04";
+  if (model === "haiku" && useWebSearch) return "~$0.06";
   if (model === "sonnet" && !useWebSearch) return "~$0.05";
   return "~$0.15";
 }
@@ -175,6 +175,15 @@ export class ResultModal extends Modal {
       contentEl.createEl("p", {
         text: this.result.descriptionJp,
         cls: "tube-scribe-description",
+      });
+    }
+
+    // Hashtags
+    if (this.result.hashtags.length > 0) {
+      contentEl.createEl("h3", { text: "Hashtags" });
+      contentEl.createEl("p", {
+        text: this.result.hashtags.join(" "),
+        cls: "tube-scribe-tags",
       });
     }
 

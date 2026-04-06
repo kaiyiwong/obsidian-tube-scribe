@@ -43,7 +43,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
   getCostDetails(): { value: string; runsPerFive: string } {
     const { model, useWebSearch } = this.plugin.settings;
     if (model === "haiku" && !useWebSearch) return { value: "~$0.01", runsPerFive: "500" };
-    if (model === "haiku" && useWebSearch) return { value: "~$0.04", runsPerFive: "125" };
+    if (model === "haiku" && useWebSearch) return { value: "~$0.06", runsPerFive: "80" };
     if (model === "sonnet" && !useWebSearch) return { value: "~$0.05", runsPerFive: "100" };
     return { value: "~$0.15", runsPerFive: "33" };
   }
@@ -179,7 +179,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Web search")
       .setDesc(
-        "Searches for current competitor titles and trending keywords, best for events, seasonal content, or uncommon topics. Adds ~$0.03-0.10/run."
+        "Searches for current competitor titles and trending keywords, best for events, seasonal content, or uncommon topics. Adds ~$0.05-0.10/run."
       )
       .addToggle((toggle) => {
         toggle

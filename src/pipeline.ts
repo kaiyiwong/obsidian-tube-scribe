@@ -5,6 +5,7 @@ export interface PipelineResult {
   titles: string[];
   descriptionEn: string;
   descriptionJp: string;
+  hashtags: string[];
   tags: string[];
   generatedAt: string;
 }
@@ -74,6 +75,7 @@ Return a JSON object with exactly this shape:
   "titles": [${titleCount} title options, ranked by estimated search performance],
   "descriptionEn": ${languageOutput !== "jp" ? '"SEO description in English. First 2 lines must hook viewers (visible before Show More). Include location, what viewers will experience, and natural keywords. 150-250 words total."' : '""'},
   "descriptionJp": ${languageOutput !== "en" ? '"SEO description in Japanese — written natively for JP YouTube audience, not translated from English. First 2 lines are the hook. 150-250 words. Use natural Japanese phrasing."' : '""'},
+  "hashtags": [exactly 3 hashtags to place at the top of the description, with # prefix. Pick the highest-impact searchable terms.],
   "tags": [${tagCount} tags — include BOTH English and Japanese for each location/term (e.g. "shibuya", "渋谷"). Lead with long-tail keywords (e.g. "walking tour Shimokitazawa 2024"), then broader terms. Include alternate romanizations. No # prefix]
 }
 
@@ -178,6 +180,7 @@ export async function runPipeline(
     titles?: string[];
     descriptionEn?: string;
     descriptionJp?: string;
+    hashtags?: string[];
     tags?: string[];
   };
 
@@ -193,6 +196,7 @@ export async function runPipeline(
     titles: parsed.titles ?? [],
     descriptionEn: parsed.descriptionEn ?? "",
     descriptionJp: parsed.descriptionJp ?? "",
+    hashtags: parsed.hashtags ?? [],
     tags: parsed.tags ?? [],
     generatedAt: new Date().toISOString(),
   };
@@ -221,6 +225,11 @@ export function formatMetadataBlock(result: PipelineResult): string {
   if (result.descriptionJp) {
     lines.push("", "### Description (JP)");
     lines.push(result.descriptionJp);
+  }
+
+  if (result.hashtags.length > 0) {
+    lines.push("", "### Hashtags");
+    lines.push(result.hashtags.join(" "));
   }
 
   if (result.tags.length > 0) {
