@@ -1,0 +1,54 @@
+/* Progress modal */
+.tube-scribe-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tube-scribe-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--interactive-accent);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: tube-scribe-spin 0.8s linear infinite;
+}
+
+@keyframes tube-scribe-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Result modal */
+.tube-scribe-result {
+  max-width: 600px;
+}
+
+.tube-scribe-description {
+  font-size: 0.85em;
+  opacity: 0.8;
+  white-space: pre-wrap;
+}
+
+.tube-scribe-tags {
+  font-size: 0.85em;
+}
+
+.tube-scribe-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Settings */
+.tube-scribe-input-wide {
+  width: 100%;
+}
+
+.tube-scribe-cost-estimate {
+  margin-bottom: 12px;
+  font-weight: bold;
+}

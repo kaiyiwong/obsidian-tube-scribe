@@ -3,7 +3,6 @@ import type { PipelineResult } from "./pipeline";
 
 export class ProgressModal extends Modal {
   private messageEl: HTMLElement;
-  private statusEl: HTMLElement;
 
   constructor(app: App) {
     super(app);
@@ -13,31 +12,15 @@ export class ProgressModal extends Modal {
     const { contentEl } = this;
     contentEl.empty();
 
-    contentEl.createEl("h2", { text: "TubeScribe" });
+    new Setting(contentEl).setName("TubeScribe").setHeading();
 
-    this.statusEl = contentEl.createEl("div", {
+    const statusEl = contentEl.createEl("div", {
       cls: "tube-scribe-status",
     });
-    this.statusEl.style.display = "flex";
-    this.statusEl.style.alignItems = "center";
-    this.statusEl.style.gap = "10px";
-    this.statusEl.style.marginTop = "10px";
 
-    const spinner = this.statusEl.createEl("span");
-    spinner.style.display = "inline-block";
-    spinner.style.width = "16px";
-    spinner.style.height = "16px";
-    spinner.style.border = "2px solid var(--interactive-accent)";
-    spinner.style.borderTopColor = "transparent";
-    spinner.style.borderRadius = "50%";
-    spinner.style.animation = "tube-scribe-spin 0.8s linear infinite";
+    statusEl.createEl("span", { cls: "tube-scribe-spinner" });
 
-    // Inject keyframe animation
-    const style = document.createElement("style");
-    style.textContent = `@keyframes tube-scribe-spin { to { transform: rotate(360deg); } }`;
-    document.head.appendChild(style);
-
-    this.messageEl = this.statusEl.createEl("span", {
+    this.messageEl = statusEl.createEl("span", {
       text: "Starting pipeline...",
     });
   }
@@ -66,9 +49,9 @@ export class ResultModal extends Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.style.maxWidth = "600px";
+    contentEl.addClass("tube-scribe-result");
 
-    contentEl.createEl("h2", { text: "📺 Generated Metadata" });
+    new Setting(contentEl).setName("Generated metadata").setHeading();
 
     // Titles
     contentEl.createEl("h3", { text: "Titles" });
@@ -80,41 +63,39 @@ export class ResultModal extends Modal {
     // EN Description
     if (this.result.descriptionEn) {
       contentEl.createEl("h3", { text: "Description (EN)" });
-      const descEl = contentEl.createEl("p", {
+      contentEl.createEl("p", {
         text: this.result.descriptionEn,
+        cls: "tube-scribe-description",
       });
-      descEl.style.fontSize = "0.85em";
-      descEl.style.opacity = "0.8";
-      descEl.style.whiteSpace = "pre-wrap";
     }
 
     // JP Description
     if (this.result.descriptionJp) {
       contentEl.createEl("h3", { text: "Description (JP)" });
-      const descJpEl = contentEl.createEl("p", {
+      contentEl.createEl("p", {
         text: this.result.descriptionJp,
+        cls: "tube-scribe-description",
       });
-      descJpEl.style.fontSize = "0.85em";
-      descJpEl.style.opacity = "0.8";
-      descJpEl.style.whiteSpace = "pre-wrap";
     }
 
     // Tags
     if (this.result.tags.length > 0) {
       contentEl.createEl("h3", { text: "Tags" });
-      contentEl.createEl("p", { text: this.result.tags.join(", ") }).style.fontSize = "0.85em";
+      contentEl.createEl("p", {
+        text: this.result.tags.join(", "),
+        cls: "tube-scribe-tags",
+      });
     }
 
     // Buttons
-    const buttonRow = contentEl.createEl("div");
-    buttonRow.style.display = "flex";
-    buttonRow.style.gap = "10px";
-    buttonRow.style.marginTop = "20px";
+    const buttonRow = contentEl.createEl("div", {
+      cls: "tube-scribe-buttons",
+    });
 
     new Setting(buttonRow)
       .addButton((btn) => {
         btn
-          .setButtonText("Append to Note")
+          .setButtonText("Append to note")
           .setCta()
           .onClick(() => {
             this.onInsert();

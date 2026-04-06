@@ -16,32 +16,26 @@ export default class TubeScribePlugin extends Plugin {
     // Register main command
     this.addCommand({
       id: "generate-youtube-metadata",
-      name: "Generate YouTube Metadata",
+      name: "Generate YouTube metadata",
       checkCallback: (checking: boolean) => {
         const file = this.app.workspace.getActiveFile();
         if (!file) return false;
         if (checking) return true;
 
-        this.runMetadataPipeline(file);
+        void this.runMetadataPipeline(file);
         return true;
       },
     });
 
     // Ribbon icon
-    this.addRibbonIcon("youtube", "TubeScribe: Generate Metadata", () => {
+    this.addRibbonIcon("youtube", "TubeScribe: Generate metadata", () => {
       const file = this.app.workspace.getActiveFile();
       if (!file) {
         new Notice("TubeScribe: No active note open.");
         return;
       }
-      this.runMetadataPipeline(file);
+      void this.runMetadataPipeline(file);
     });
-
-    console.log("TubeScribe loaded.");
-  }
-
-  onunload() {
-    console.log("TubeScribe unloaded.");
   }
 
   async loadSettings() {
@@ -99,7 +93,7 @@ export default class TubeScribePlugin extends Plugin {
       const currentContent = await this.app.vault.read(file);
       const metadataBlock = formatMetadataBlock(result);
       await this.app.vault.modify(file, currentContent + metadataBlock);
-      new Notice("TubeScribe: Metadata appended to note ✓");
+      new Notice("TubeScribe: Metadata appended to note.");
     } catch (err) {
       new Notice("TubeScribe: Failed to write to note.");
       console.error("TubeScribe write error:", err);

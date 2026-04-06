@@ -45,11 +45,11 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "TubeScribe Settings" });
+    new Setting(containerEl).setName("TubeScribe settings").setHeading();
 
     // API Key
     new Setting(containerEl)
-      .setName("Anthropic API Key")
+      .setName("Anthropic API key")
       .setDesc(
         "Your Anthropic API key. Stored locally on your device and only sent directly to api.anthropic.com."
       )
@@ -62,12 +62,12 @@ export class TubeScribeSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
         text.inputEl.type = "password";
-        text.inputEl.style.width = "100%";
+        text.inputEl.addClass("tube-scribe-input-wide");
       });
 
     // Channel Context
     new Setting(containerEl)
-      .setName("Channel Context")
+      .setName("Channel context")
       .setDesc(
         "One or two sentences about your channel. Used to focus research and tailor generated metadata."
       )
@@ -80,12 +80,12 @@ export class TubeScribeSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
         text.inputEl.rows = 3;
-        text.inputEl.style.width = "100%";
+        text.inputEl.addClass("tube-scribe-input-wide");
       });
 
     // Language Output
     new Setting(containerEl)
-      .setName("Language Output")
+      .setName("Language output")
       .setDesc("Which languages to generate descriptions in.")
       .addDropdown((drop) => {
         drop
@@ -101,7 +101,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
 
     // Title Count
     new Setting(containerEl)
-      .setName("Number of Titles")
+      .setName("Number of titles")
       .setDesc("How many title options to generate (1–5).")
       .addSlider((slider) => {
         slider
@@ -116,7 +116,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
 
     // Tag Count
     new Setting(containerEl)
-      .setName("Number of Tags")
+      .setName("Number of tags")
       .setDesc("How many tags to generate (5–30).")
       .addSlider((slider) => {
         slider
@@ -130,15 +130,13 @@ export class TubeScribeSettingTab extends PluginSettingTab {
       });
 
     // Cost & Performance section
-    containerEl.createEl("h3", { text: "Cost & Performance" });
+    new Setting(containerEl).setName("Cost & performance").setHeading();
 
     const costEstimate = this.getCostEstimate();
     const costEl = containerEl.createEl("p", {
       text: costEstimate,
-      cls: "setting-item-description",
+      cls: ["setting-item-description", "tube-scribe-cost-estimate"],
     });
-    costEl.style.marginBottom = "12px";
-    costEl.style.fontWeight = "bold";
 
     // Model
     new Setting(containerEl)
@@ -160,7 +158,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
 
     // Web Search
     new Setting(containerEl)
-      .setName("Web Search")
+      .setName("Web search")
       .setDesc(
         "Searches for current competitor titles and trending keywords. Best for events, seasonal content, or uncommon topics. Adds ~$0.03-0.10/run."
       )
@@ -176,7 +174,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
 
     // Include Timestamps
     new Setting(containerEl)
-      .setName("Include Timestamp Placeholders")
+      .setName("Include timestamp placeholders")
       .setDesc(
         "Add suggested chapter timestamps in the description (you fill in the actual times)."
       )
@@ -191,7 +189,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
 
     // Include Links
     new Setting(containerEl)
-      .setName("Include Links Section")
+      .setName("Include links section")
       .setDesc(
         "Add a links section in the description (subscribe, social, related videos)."
       )
