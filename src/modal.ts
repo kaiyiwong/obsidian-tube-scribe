@@ -138,9 +138,9 @@ export class ProgressModal extends Modal {
 
 export class ResultModal extends Modal {
   private result: PipelineResult;
-  private onInsert: () => void;
+  private onInsert: () => Promise<void>;
 
-  constructor(app: App, result: PipelineResult, onInsert: () => void) {
+  constructor(app: App, result: PipelineResult, onInsert: () => Promise<void>) {
     super(app);
     this.result = result;
     this.onInsert = onInsert;
@@ -162,7 +162,7 @@ export class ResultModal extends Modal {
 
     // EN Description
     if (this.result.descriptionEn) {
-      contentEl.createEl("h3", { text: "Description (EN)" });
+      contentEl.createEl("h3", { text: "Description (en)" });
       contentEl.createEl("p", {
         text: this.result.descriptionEn,
         cls: "tube-scribe-description",
@@ -171,7 +171,7 @@ export class ResultModal extends Modal {
 
     // JP Description
     if (this.result.descriptionJp) {
-      contentEl.createEl("h3", { text: "Description (JP)" });
+      contentEl.createEl("h3", { text: "Description (jp)" });
       contentEl.createEl("p", {
         text: this.result.descriptionJp,
         cls: "tube-scribe-description",
@@ -197,8 +197,8 @@ export class ResultModal extends Modal {
         btn
           .setButtonText("Append to note")
           .setCta()
-          .onClick(() => {
-            this.onInsert();
+          .onClick(async () => {
+            await this.onInsert();
             this.close();
           });
       })

@@ -22,19 +22,19 @@ export default class TubeScribePlugin extends Plugin {
         if (!file) return false;
         if (checking) return true;
 
-        this.confirmAndRun(file);
+        void this.confirmAndRun(file);
         return true;
       },
     });
 
     // Ribbon icon
-    this.addRibbonIcon("youtube", "TubeScribe: Generate metadata", () => {
+    this.addRibbonIcon("youtube", "TubeScribe: generate metadata", () => {
       const file = this.app.workspace.getActiveFile();
       if (!file) {
-        new Notice("TubeScribe: No active note open.");
+        new Notice("TubeScribe: no active note open.");
         return;
       }
-      this.confirmAndRun(file);
+      void this.confirmAndRun(file);
     });
   }
 
@@ -46,10 +46,19 @@ export default class TubeScribePlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  private confirmAndRun(file: TFile) {
+  private async confirmAndRun(file: TFile) {
     if (!this.settings.anthropicApiKey) {
       new Notice(
-        "TubeScribe: Please set your Anthropic API key in settings first.",
+        "TubeScribe: please set your Anthropic API key in settings first.",
+        5000
+      );
+      return;
+    }
+
+    const noteContent = await this.app.vault.read(file);
+    if (!noteContent.trim()) {
+      new Notice(
+        "TubeScribe: note is empty. Add some content about your video first.",
         5000
       );
       return;
@@ -88,7 +97,7 @@ export default class TubeScribePlugin extends Plugin {
       progressModal.close();
       const message =
         err instanceof Error ? err.message : "Unknown error occurred.";
-      new Notice(`TubeScribe error: ${message}`, 8000);
+      new Notice(`TubeScribe: ${message}`, 8000);
       console.error("TubeScribe pipeline error:", err);
     }
   }
@@ -101,9 +110,9 @@ export default class TubeScribePlugin extends Plugin {
       const currentContent = await this.app.vault.read(file);
       const metadataBlock = formatMetadataBlock(result);
       await this.app.vault.modify(file, currentContent + metadataBlock);
-      new Notice("TubeScribe: Metadata appended to note.");
+      new Notice("TubeScribe: metadata appended to note.");
     } catch (err) {
-      new Notice("TubeScribe: Failed to write to note.");
+      new Notice("TubeScribe: failed to write to note.");
       console.error("TubeScribe write error:", err);
     }
   }

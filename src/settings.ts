@@ -52,13 +52,13 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    new Setting(containerEl).setName("TubeScribe settings").setHeading();
+    new Setting(containerEl).setName("General").setHeading();
 
     // API Key
     new Setting(containerEl)
-      .setName("Anthropic API key")
+      .setName("API key")
       .setDesc(
-        "Your Anthropic API key. Stored locally on your device and only sent directly to api.anthropic.com."
+        "Stored locally on your device and only sent directly to api.anthropic.com."
       )
       .addText((text) => {
         text
@@ -76,11 +76,11 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Channel context")
       .setDesc(
-        "One or two sentences about your channel. Used to focus research and tailor generated metadata."
+        "One or two sentences about your channel, used to focus research and tailor generated metadata."
       )
       .addTextArea((text) => {
         text
-          .setPlaceholder("e.g. Silent walking videos across Tokyo neighborhoods...")
+          .setPlaceholder("e.g. silent walking videos across Tokyo neighborhoods...")
           .setValue(this.plugin.settings.channelContext)
           .onChange(async (value) => {
             this.plugin.settings.channelContext = value;
@@ -93,7 +93,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     // Language Output
     new Setting(containerEl)
       .setName("Language output")
-      .setDesc("Which languages to generate descriptions in.")
+      .setDesc("Which languages to generate descriptions in")
       .addDropdown((drop) => {
         drop
           .addOption("en", "English only")
@@ -161,12 +161,12 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Model")
       .setDesc(
-        "Haiku: fast, great for everyday use (~$0.01/run). Sonnet: stronger Japanese writing and more creative titles (~$0.05/run). Upgrade to Sonnet when you need polished JP descriptions."
+        "Haiku is fast, great for everyday use (~$0.01/run). Sonnet has stronger Japanese writing and more creative titles (~$0.05/run)."
       )
       .addDropdown((drop) => {
         drop
-          .addOption("haiku", "Claude Haiku (default)")
-          .addOption("sonnet", "Claude Sonnet (premium)")
+          .addOption("haiku", "Haiku (default)")
+          .addOption("sonnet", "Sonnet (premium)")
           .setValue(this.plugin.settings.model)
           .onChange(async (value) => {
             this.plugin.settings.model = value as "sonnet" | "haiku";
@@ -179,7 +179,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Web search")
       .setDesc(
-        "Searches for current competitor titles and trending keywords. Best for events, seasonal content, or uncommon topics. Adds ~$0.03-0.10/run."
+        "Searches for current competitor titles and trending keywords, best for events, seasonal content, or uncommon topics. Adds ~$0.03-0.10/run."
       )
       .addToggle((toggle) => {
         toggle
@@ -223,7 +223,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
 
     // Footer note
     containerEl.createEl("p", {
-      text: "Your API key is stored in Obsidian's local config and never leaves your device except in direct requests to the Anthropic API.",
+      text: "Your API key is stored locally and never leaves your device except in direct requests to api.anthropic.com.",
       cls: "setting-item-description",
     });
   }
