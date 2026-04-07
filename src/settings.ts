@@ -94,9 +94,9 @@ export class TubeScribeSettingTab extends PluginSettingTab {
       .setDesc("Which languages to generate descriptions in")
       .addDropdown((drop) => {
         drop
-          .addOption("en", "English only")
-          .addOption("en+jp", "English and Japanese")
-          .addOption("jp", "Japanese only")
+          .addOption("en", "EN only")
+          .addOption("en+jp", "EN + JP")
+          .addOption("jp", "JP only")
           .setValue(this.plugin.settings.languageOutput)
           .onChange(async (value) => {
             this.plugin.settings.languageOutput = value as "en" | "en+jp" | "jp";
