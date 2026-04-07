@@ -51,16 +51,44 @@ function buildUserPrompt(
 ): string {
   const { titleCount, tagCount, languageOutput } = settings;
 
+  const isShort = settings.videoType === "short";
+
   const descriptionExtras: string[] = [];
-  if (settings.includeTimestamps) {
+  if (!isShort && settings.includeTimestamps) {
     descriptionExtras.push("Include a Timestamps/Chapters section with 4-6 placeholder entries like '0:00 - Start / Arrival at [location]', '2:30 - [landmark or scene]'. Use realistic intervals for a walking video.");
   }
-  if (settings.includeLinks) {
+  if (!isShort && settings.includeLinks) {
     descriptionExtras.push("End with a Links section containing placeholders: Subscribe link, social media, and 2-3 related video suggestions.");
   }
   const extrasBlock = descriptionExtras.length > 0
     ? "\n\nDescription extras:\n" + descriptionExtras.map(e => `- ${e}`).join("\n")
     : "";
+
+  if (isShort) {
+    return `Generate YouTube Shorts metadata for this video note:
+
+---
+${noteContent}
+---
+
+${settings.useWebSearch ? "Do 1-2 web searches to research top-performing Shorts titles and trending hashtags for this topic." : "Generate metadata based on your knowledge of YouTube Shorts SEO and this niche."}
+
+Return a JSON object with exactly this shape:
+{
+  "titles": [${titleCount} title options, ranked by estimated performance],
+  "descriptionEn": ${languageOutput !== "jp" ? '"Short punchy description in English, 1-2 sentences max. Front-load keywords."' : '""'},
+  "descriptionJp": ${languageOutput !== "en" ? '"Short punchy description in Japanese, 1-2 sentences max. Written natively."' : '""'},
+  "hashtags": [5 hashtags with # prefix. #Shorts MUST be first. Pick trending, high-impact terms.],
+  "tags": [${tagCount} tags — include both English and Japanese for locations. No # prefix]
+}
+
+Title rules:
+- Keep under 40 characters (Shorts titles must be brief)
+- Hook immediately — first few words matter most
+- Use trending formats and keywords for Shorts
+
+Return only the JSON object. No markdown fences. No explanation.`;
+  }
 
   return `Generate YouTube metadata for this video note:
 

@@ -11,6 +11,7 @@ export interface TubeScribeSettings {
   includeLinks: boolean;
   useWebSearch: boolean;
   model: "sonnet" | "haiku";
+  videoType: "video" | "short";
 }
 
 export const DEFAULT_SETTINGS: TubeScribeSettings = {
@@ -23,6 +24,7 @@ export const DEFAULT_SETTINGS: TubeScribeSettings = {
   includeLinks: false,
   useWebSearch: false,
   model: "haiku",
+  videoType: "video",
 };
 
 export function getCostColorClass(model: string, useWebSearch: boolean): string {

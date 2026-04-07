@@ -6,6 +6,7 @@ import { getCostColorClass } from "./settings";
 interface RunOptions {
   model: "sonnet" | "haiku";
   useWebSearch: boolean;
+  videoType: "video" | "short";
 }
 
 function getCostValue(model: string, useWebSearch: boolean): string {
@@ -25,6 +26,7 @@ export class ConfirmModal extends Modal {
     this.options = {
       model: settings.model,
       useWebSearch: settings.useWebSearch,
+      videoType: "video",
     };
   }
 
@@ -52,6 +54,19 @@ export class ConfirmModal extends Modal {
     };
 
     updateCostDisplay();
+
+    // Video type
+    new Setting(contentEl)
+      .setName("Format")
+      .addDropdown((drop) => {
+        drop
+          .addOption("video", "Video")
+          .addOption("short", "Short")
+          .setValue(this.options.videoType)
+          .onChange((value) => {
+            this.options.videoType = value as "video" | "short";
+          });
+      });
 
     // Model toggle
     new Setting(contentEl)
