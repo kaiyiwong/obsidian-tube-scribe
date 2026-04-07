@@ -112,7 +112,7 @@ export class ProgressModal extends Modal {
     const { contentEl } = this;
     contentEl.empty();
 
-    new Setting(contentEl).setName("TubeScribe").setHeading();
+    new Setting(contentEl).setName("Generating...").setHeading();
 
     const statusEl = contentEl.createEl("div", {
       cls: "tube-scribe-status",

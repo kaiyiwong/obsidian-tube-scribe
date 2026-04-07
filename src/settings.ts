@@ -52,8 +52,6 @@ export class TubeScribeSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    new Setting(containerEl).setName("General").setHeading();
-
     // API Key
     new Setting(containerEl)
       .setName("API key")
@@ -62,7 +60,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
       )
       .addText((text) => {
         text
-          .setPlaceholder("sk-ant-...")
+          .setPlaceholder("Enter your API key")
           .setValue(this.plugin.settings.anthropicApiKey)
           .onChange(async (value) => {
             this.plugin.settings.anthropicApiKey = value.trim();
@@ -80,7 +78,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
       )
       .addTextArea((text) => {
         text
-          .setPlaceholder("e.g. silent walking videos across Tokyo neighborhoods...")
+          .setPlaceholder("Describe your channel in a sentence or two")
           .setValue(this.plugin.settings.channelContext)
           .onChange(async (value) => {
             this.plugin.settings.channelContext = value;
@@ -97,7 +95,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
       .addDropdown((drop) => {
         drop
           .addOption("en", "English only")
-          .addOption("en+jp", "English + Japanese")
+          .addOption("en+jp", "English and Japanese")
           .addOption("jp", "Japanese only")
           .setValue(this.plugin.settings.languageOutput)
           .onChange(async (value) => {

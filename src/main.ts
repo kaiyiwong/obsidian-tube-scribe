@@ -28,10 +28,10 @@ export default class TubeScribePlugin extends Plugin {
     });
 
     // Ribbon icon
-    this.addRibbonIcon("youtube", "TubeScribe: generate metadata", () => {
+    this.addRibbonIcon("youtube", "Generate metadata", () => {
       const file = this.app.workspace.getActiveFile();
       if (!file) {
-        new Notice("TubeScribe: no active note open.");
+        new Notice("No active note open.");
         return;
       }
       void this.confirmAndRun(file);
@@ -49,7 +49,7 @@ export default class TubeScribePlugin extends Plugin {
   private async confirmAndRun(file: TFile) {
     if (!this.settings.anthropicApiKey) {
       new Notice(
-        "TubeScribe: please set your Anthropic API key in settings first.",
+        "Please set your API key in settings first.",
         5000
       );
       return;
@@ -58,7 +58,7 @@ export default class TubeScribePlugin extends Plugin {
     const noteContent = await this.app.vault.read(file);
     if (!noteContent.trim()) {
       new Notice(
-        "TubeScribe: note is empty. Add some content about your video first.",
+        "Note is empty. Add some content about your video first.",
         5000
       );
       return;
@@ -97,7 +97,7 @@ export default class TubeScribePlugin extends Plugin {
       progressModal.close();
       const message =
         err instanceof Error ? err.message : "Unknown error occurred.";
-      new Notice(`TubeScribe: ${message}`, 8000);
+      new Notice(message, 8000);
       console.error("TubeScribe pipeline error:", err);
     }
   }
@@ -110,9 +110,9 @@ export default class TubeScribePlugin extends Plugin {
       const currentContent = await this.app.vault.read(file);
       const metadataBlock = formatMetadataBlock(result);
       await this.app.vault.modify(file, currentContent + metadataBlock);
-      new Notice("TubeScribe: metadata appended to note.");
+      new Notice("Metadata appended to note.");
     } catch (err) {
-      new Notice("TubeScribe: failed to write to note.");
+      new Notice("Failed to write to note.");
       console.error("TubeScribe write error:", err);
     }
   }
