@@ -97,7 +97,7 @@ export class TubeScribeSettingTab extends PluginSettingTab {
       .addDropdown((drop) => {
         drop
           .addOption("en", "En only")
-          .addOption("en+jp", "En + Jp")
+          .addOption("en+jp", "En + jp")
           .addOption("jp", "Jp only")
           .setValue(this.plugin.settings.languageOutput)
           .onChange(async (value) => {
