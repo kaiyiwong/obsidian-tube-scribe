@@ -168,12 +168,23 @@ export class ResultModal extends Modal {
 
     new Setting(contentEl).setName("Generated metadata").setHeading();
 
-    // Titles
-    contentEl.createEl("h3", { text: "Titles" });
-    const titleList = contentEl.createEl("ol");
-    this.result.titles.forEach((title) => {
-      titleList.createEl("li", { text: title });
-    });
+    // Search titles
+    if (this.result.searchTitles.length > 0) {
+      contentEl.createEl("h3", { text: "Search titles" });
+      const searchList = contentEl.createEl("ol");
+      this.result.searchTitles.forEach((title) => {
+        searchList.createEl("li", { text: title });
+      });
+    }
+
+    // Click titles
+    if (this.result.clickTitles.length > 0) {
+      contentEl.createEl("h3", { text: "Click titles" });
+      const clickList = contentEl.createEl("ol");
+      this.result.clickTitles.forEach((title) => {
+        clickList.createEl("li", { text: title });
+      });
+    }
 
     // EN Description
     if (this.result.descriptionEn) {
@@ -208,6 +219,24 @@ export class ResultModal extends Modal {
       contentEl.createEl("p", {
         text: this.result.tags.join(", "),
         cls: "tube-scribe-tags",
+      });
+    }
+
+    // Thumbnail texts
+    if (this.result.thumbnailTexts.length > 0) {
+      contentEl.createEl("h3", { text: "Thumbnail text ideas" });
+      const thumbList = contentEl.createEl("ul");
+      this.result.thumbnailTexts.forEach((text) => {
+        thumbList.createEl("li", { text });
+      });
+    }
+
+    // Pinned comment
+    if (this.result.pinnedComment) {
+      contentEl.createEl("h3", { text: "Pinned comment" });
+      contentEl.createEl("p", {
+        text: this.result.pinnedComment,
+        cls: "tube-scribe-description",
       });
     }
 

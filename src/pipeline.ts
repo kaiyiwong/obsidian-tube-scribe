@@ -2,11 +2,14 @@ import { requestUrl } from "obsidian";
 import type { TubeScribeSettings } from "./settings";
 
 export interface PipelineResult {
-  titles: string[];
+  searchTitles: string[];
+  clickTitles: string[];
   descriptionEn: string;
   descriptionJp: string;
   hashtags: string[];
   tags: string[];
+  thumbnailTexts: string[];
+  pinnedComment: string;
   generatedAt: string;
 }
 
@@ -75,15 +78,18 @@ ${settings.useWebSearch ? "Do 1-2 web searches to research top-performing Shorts
 
 Return a JSON object with exactly this shape:
 {
-  "titles": [${titleCount} title options, ranked by estimated performance],
+  "searchTitles": [${titleCount} search-optimized Shorts titles — keyword-focused, under 40 chars],
+  "clickTitles": [${titleCount} click-optimized Shorts titles — hook immediately, curiosity or surprise, under 40 chars],
   "descriptionEn": ${languageOutput !== "jp" ? '"Short punchy description in English, 1-2 sentences max. Front-load keywords."' : '""'},
   "descriptionJp": ${languageOutput !== "en" ? '"Short punchy description in Japanese, 1-2 sentences max. Written natively."' : '""'},
   "hashtags": [5 hashtags with # prefix. #Shorts MUST be first. Pick trending, high-impact terms.],
-  "tags": [${tagCount} tags — include both English and Japanese for locations. No # prefix]
+  "tags": [${tagCount} tags — include both English and Japanese for locations. No # prefix],
+  "thumbnailTexts": [3 short text overlay suggestions for the thumbnail — 2-3 words max, ALL CAPS, no emojis, readable at small size],
+  "pinnedComment": "A short engaging question to pin as first comment"
 }
 
 Title rules:
-- Keep under 40 characters (Shorts titles must be brief)
+- Keep under 40 characters
 - Hook immediately — first few words matter most
 - Use trending formats and keywords for Shorts
 
@@ -100,19 +106,27 @@ ${settings.useWebSearch ? "Do 1-2 web searches to research top-performing titles
 
 Return a JSON object with exactly this shape:
 {
-  "titles": [${titleCount} title options, ranked by estimated search performance],
-  "descriptionEn": ${languageOutput !== "jp" ? '"SEO description in English. First 2 lines must hook viewers (visible before Show More). Include location, what viewers will experience, and natural keywords. 150-250 words total."' : '""'},
-  "descriptionJp": ${languageOutput !== "en" ? '"SEO description in Japanese — written natively for JP YouTube audience, not translated from English. First 2 lines are the hook. 150-250 words. Use natural Japanese phrasing."' : '""'},
-  "hashtags": [exactly 3 hashtags to place at the top of the description, with # prefix. Pick the highest-impact searchable terms.],
-  "tags": [${tagCount} tags — include BOTH English and Japanese for each location/term (e.g. "shibuya", "渋谷"). Lead with long-tail keywords (e.g. "walking tour Shimokitazawa 2024"), then broader terms. Include alternate romanizations. No # prefix]
+  "searchTitles": [${titleCount} search-optimized titles — keyword-rich, designed to rank when people search for this topic],
+  "clickTitles": [${titleCount} click-optimized titles — curiosity gaps, emotion, or surprising angles that make people click from Browse/Suggested. Use the video's unique details (crowds, weather, specific sights) to stand out],
+  "descriptionEn": ${languageOutput !== "jp" ? '"SEO description in English structured as: Line 1-2: Pack ALL major search keywords into the first 150 characters (location, activity, year, format) — this is what YouTube indexes. Then: Main body with what viewers will see, the vibe, and natural keywords. Then: Hashtags line. 150-250 words total."' : '""'},
+  "descriptionJp": ${languageOutput !== "en" ? '"SEO description in Japanese — same structure as English but written natively for JP YouTube audience, not translated. First 2 lines are the hook. 150-250 words."' : '""'},
+  "hashtags": [exactly 3 hashtags with # prefix, highest-impact searchable terms],
+  "tags": [${tagCount} tags — include BOTH English and Japanese for each location/term (e.g. "shibuya", "渋谷"). Lead with long-tail keywords. Include alternate romanizations. No # prefix],
+  "thumbnailTexts": [3 short punchy text overlay suggestions for the thumbnail — 2-4 words max each, ALL CAPS, no emojis. Designed to be readable at small size in a bold clean font. Let the video footage speak visually.],
+  "pinnedComment": "A conversational question or prompt to pin as the first comment, designed to drive engagement (e.g. 'Have you visited here during sakura season?')"
 }
 
-Title rules:
-- Keep under 65 characters (YouTube truncates beyond this)
+Search title rules:
+- Keep under 65 characters
 - Put the location/topic at the front
 - Include markers like [4K] [Walking Tour] where relevant
-- Study what the web search found — mirror patterns from high-view videos
-- Feel written by a human, not an algorithm
+- Mirror patterns from high-view competitor videos
+
+Click title rules:
+- Keep under 65 characters
+- Lead with emotion, surprise, or a specific detail from the video
+- Use curiosity gaps ("I didn't expect...", "Is it worth the crowds?")
+- Feel personal and opinionated, not generic
 ${extrasBlock}
 Return only the JSON object. No markdown fences. No explanation.`;
 }
@@ -205,11 +219,14 @@ export async function runPipeline(
     .trim();
 
   let parsed: {
-    titles?: string[];
+    searchTitles?: string[];
+    clickTitles?: string[];
     descriptionEn?: string;
     descriptionJp?: string;
     hashtags?: string[];
     tags?: string[];
+    thumbnailTexts?: string[];
+    pinnedComment?: string;
   };
 
   try {
@@ -221,11 +238,14 @@ export async function runPipeline(
   }
 
   return {
-    titles: parsed.titles ?? [],
+    searchTitles: parsed.searchTitles ?? [],
+    clickTitles: parsed.clickTitles ?? [],
     descriptionEn: parsed.descriptionEn ?? "",
     descriptionJp: parsed.descriptionJp ?? "",
     hashtags: parsed.hashtags ?? [],
     tags: parsed.tags ?? [],
+    thumbnailTexts: parsed.thumbnailTexts ?? [],
+    pinnedComment: parsed.pinnedComment ?? "",
     generatedAt: new Date().toISOString(),
   };
 }
@@ -240,10 +260,19 @@ export function formatMetadataBlock(result: PipelineResult): string {
     "",
   ];
 
-  lines.push("### Titles");
-  result.titles.forEach((title, i) => {
-    lines.push(`${i + 1}. ${title}`);
-  });
+  if (result.searchTitles.length > 0) {
+    lines.push("### Search titles");
+    result.searchTitles.forEach((title, i) => {
+      lines.push(`${i + 1}. ${title}`);
+    });
+  }
+
+  if (result.clickTitles.length > 0) {
+    lines.push("", "### Click titles");
+    result.clickTitles.forEach((title, i) => {
+      lines.push(`${i + 1}. ${title}`);
+    });
+  }
 
   if (result.descriptionEn) {
     lines.push("", "### Description (EN)");
@@ -263,6 +292,18 @@ export function formatMetadataBlock(result: PipelineResult): string {
   if (result.tags.length > 0) {
     lines.push("", "### Tags");
     lines.push(result.tags.join(", "));
+  }
+
+  if (result.thumbnailTexts.length > 0) {
+    lines.push("", "### Thumbnail text ideas");
+    result.thumbnailTexts.forEach((text) => {
+      lines.push(`- ${text}`);
+    });
+  }
+
+  if (result.pinnedComment) {
+    lines.push("", "### Pinned comment");
+    lines.push(result.pinnedComment);
   }
 
   lines.push("", "---", "");
