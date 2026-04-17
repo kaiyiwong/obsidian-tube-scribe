@@ -136,6 +136,35 @@ ${extrasBlock}
 Return only the JSON object. No markdown fences. No explanation.`;
 }
 
+function fixNewlinesInJsonStrings(text: string): string {
+  let result = "";
+  let inString = false;
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (ch === "\\" && inString) {
+      result += ch + (text[i + 1] ?? "");
+      i += 2;
+      continue;
+    }
+    if (ch === '"') {
+      inString = !inString;
+      result += ch;
+      i++;
+      continue;
+    }
+    if ((ch === "\n" || ch === "\r") && inString) {
+      if (ch === "\r" && text[i + 1] === "\n") i++;
+      result += "\\n";
+      i++;
+      continue;
+    }
+    result += ch;
+    i++;
+  }
+  return result;
+}
+
 export async function runPipeline(
   noteContent: string,
   settings: TubeScribeSettings,
@@ -217,11 +246,15 @@ export async function runPipeline(
   const rawText = textBlocks[textBlocks.length - 1].text ?? "";
 
   // Strip any accidental markdown fences
-  const cleaned = rawText
+  let cleaned = rawText
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
     .replace(/\s*```$/i, "")
     .trim();
+
+  // Fix unescaped newlines inside JSON string values that break JSON.parse.
+  // Claude often outputs literal line breaks in description fields.
+  cleaned = fixNewlinesInJsonStrings(cleaned);
 
   let parsed: {
     searchTitles?: string[];
