@@ -43,6 +43,8 @@ Channel context: ${settings.channelContext}
 
 Your job is to generate YouTube metadata that maximizes discoverability while staying authentic to the channel's voice.
 
+Critical style rule: Write all descriptions in natural, semantic language. NEVER output pipe-separated keyword blocks (e.g. "Tokyo | Walking Tour | Sakura"). YouTube's algorithm reads natural language — keyword stuffing looks dated and hurts credibility for a premium channel.
+
 ${searchBlock}
 
 Always respond with a valid JSON object only — no markdown, no preamble, no explanation.`;
@@ -80,8 +82,8 @@ Return a JSON object with exactly this shape:
 {
   "searchTitles": [${titleCount} search-optimized Shorts titles — keyword-focused, under 40 chars],
   "clickTitles": [${titleCount} click-optimized Shorts titles — hook immediately, curiosity or surprise, under 40 chars],
-  "descriptionEn": ${languageOutput !== "jp" ? '"Short punchy description in English, 1-2 sentences max. Front-load keywords."' : '""'},
-  "descriptionJp": ${languageOutput !== "en" ? '"Short punchy description in Japanese, 1-2 sentences max. Written natively."' : '""'},
+  "descriptionEn": ${languageOutput !== "jp" ? '"Short punchy description in English, 1-2 natural sentences max. Weave keywords into readable prose — no pipe-separated keyword lists."' : '""'},
+  "descriptionJp": ${languageOutput !== "en" ? '"Short punchy description in Japanese, 1-2 natural sentences max. Written natively, not translated. No pipe-separated keyword lists."' : '""'},
   "hashtags": [5 hashtags with # prefix. #Shorts MUST be first. Pick trending, high-impact terms.],
   "tags": [${tagCount} tags — include both English and Japanese for locations. No # prefix],
   "thumbnailTexts": [3 short text overlay suggestions for the thumbnail — 2-3 words max, ALL CAPS, no emojis, readable at small size],
@@ -108,8 +110,8 @@ Return a JSON object with exactly this shape:
 {
   "searchTitles": [${titleCount} search-optimized titles — keyword-rich, designed to rank when people search for this topic],
   "clickTitles": [${titleCount} click-optimized titles — curiosity gaps, emotion, or surprising angles that make people click from Browse/Suggested. Use the video's unique details (crowds, weather, specific sights) to stand out],
-  "descriptionEn": ${languageOutput !== "jp" ? '"SEO description in English structured as: Line 1-2: Pack ALL major search keywords into the first 150 characters (location, activity, year, format) — this is what YouTube indexes. Then: Main body with what viewers will see, the vibe, and natural keywords. Then: Hashtags line. 150-250 words total."' : '""'},
-  "descriptionJp": ${languageOutput !== "en" ? '"SEO description in Japanese — same structure as English but written natively for JP YouTube audience, not translated. First 2 lines are the hook. 150-250 words."' : '""'},
+  "descriptionEn": ${languageOutput !== "jp" ? '"SEO description in English. First 2 sentences: weave ALL major keywords (location, activity, year, format) into natural, readable prose — this is what YouTube indexes. Then: Main body describing what viewers will see, the atmosphere, and context. Write like a human, not an algorithm. NEVER use pipe-separated keyword lists (e.g. Tokyo | Walking | Sakura) — they look spammy and hurt credibility. 150-250 words total."' : '""'},
+  "descriptionJp": ${languageOutput !== "en" ? '"SEO description in Japanese — same structure as English but written natively for JP YouTube audience, not translated. First 2 sentences are the hook with keywords woven in naturally. No pipe-separated keyword lists. 150-250 words."' : '""'},
   "hashtags": [exactly 3 hashtags with # prefix, highest-impact searchable terms],
   "tags": [${tagCount} tags — include BOTH English and Japanese for each location/term (e.g. "shibuya", "渋谷"). Lead with long-tail keywords. Include alternate romanizations. No # prefix],
   "thumbnailTexts": [3 short punchy text overlay suggestions for the thumbnail — 2-4 words max each, ALL CAPS, no emojis. Designed to be readable at small size in a bold clean font. Let the video footage speak visually.],
