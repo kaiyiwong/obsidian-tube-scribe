@@ -186,18 +186,25 @@ export class ResultModal extends Modal {
       });
     }
 
-    // EN Description
-    if (this.result.descriptionEn) {
-      contentEl.createEl("h3", { text: "Description (en)" });
+    // Description
+    if (this.result.descriptionEn && this.result.descriptionJp) {
+      contentEl.createEl("h3", { text: "Description" });
       contentEl.createEl("p", {
         text: this.result.descriptionEn,
         cls: "tube-scribe-description",
       });
-    }
-
-    // JP Description
-    if (this.result.descriptionJp) {
-      contentEl.createEl("h3", { text: "Description (jp)" });
+      contentEl.createEl("p", {
+        text: this.result.descriptionJp,
+        cls: "tube-scribe-description",
+      });
+    } else if (this.result.descriptionEn) {
+      contentEl.createEl("h3", { text: "Description" });
+      contentEl.createEl("p", {
+        text: this.result.descriptionEn,
+        cls: "tube-scribe-description",
+      });
+    } else if (this.result.descriptionJp) {
+      contentEl.createEl("h3", { text: "Description" });
       contentEl.createEl("p", {
         text: this.result.descriptionJp,
         cls: "tube-scribe-description",

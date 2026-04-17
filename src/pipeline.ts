@@ -43,7 +43,9 @@ Channel context: ${settings.channelContext}
 
 Your job is to generate YouTube metadata that maximizes discoverability while staying authentic to the channel's voice.
 
-Critical style rule: Write all descriptions in natural, semantic language. NEVER output pipe-separated keyword blocks (e.g. "Tokyo | Walking Tour | Sakura"). YouTube's algorithm reads natural language — keyword stuffing looks dated and hurts credibility for a premium channel.
+Critical style rules:
+- Write all descriptions in natural, semantic language. NEVER output pipe-separated keyword blocks (e.g. "Tokyo | Walking Tour | Sakura"). YouTube's algorithm reads natural language — keyword stuffing looks dated and hurts credibility for a premium channel.
+- For bilingual (EN+JP) descriptions, use the "metadata sandwich" structure: bilingual hook at the top, English body, divider, Japanese body. This doubles discovery entry points — English travelers, Japanese locals, and global Japanophiles who search in Japanese. The descriptions should feel like one unified piece, not two separate translations.
 
 ${searchBlock}
 
@@ -82,8 +84,8 @@ Return a JSON object with exactly this shape:
 {
   "searchTitles": [${titleCount} search-optimized Shorts titles — keyword-focused, under 40 chars],
   "clickTitles": [${titleCount} click-optimized Shorts titles — hook immediately, curiosity or surprise, under 40 chars],
-  "descriptionEn": ${languageOutput !== "jp" ? '"Short punchy description in English, 1-2 natural sentences max. Weave keywords into readable prose — no pipe-separated keyword lists."' : '""'},
-  "descriptionJp": ${languageOutput !== "en" ? '"Short punchy description in Japanese, 1-2 natural sentences max. Written natively, not translated. No pipe-separated keyword lists."' : '""'},
+  "descriptionEn": ${languageOutput !== "jp" ? (languageOutput === "en+jp" ? '"Bilingual Shorts description: 1 punchy English sentence, then 1 punchy Japanese sentence. Keywords woven naturally."' : '"Short punchy description in English, 1-2 natural sentences max. Weave keywords into readable prose — no pipe-separated keyword lists."') : '""'},
+  "descriptionJp": ${languageOutput !== "en" ? (languageOutput === "en+jp" ? '"" (leave empty — Japanese is included in descriptionEn above)' : '"Short punchy description in Japanese, 1-2 natural sentences max. Written natively, not translated. No pipe-separated keyword lists."') : '""'},
   "hashtags": [5 hashtags with # prefix. #Shorts MUST be first. Pick trending, high-impact terms.],
   "tags": [${tagCount} tags — include both English and Japanese for locations. No # prefix],
   "thumbnailTexts": [3 short text overlay suggestions for the thumbnail — 2-3 words max, ALL CAPS, no emojis, readable at small size],
@@ -110,8 +112,8 @@ Return a JSON object with exactly this shape:
 {
   "searchTitles": [${titleCount} search-optimized titles — keyword-rich, designed to rank when people search for this topic],
   "clickTitles": [${titleCount} click-optimized titles — curiosity gaps, emotion, or surprising angles that make people click from Browse/Suggested. Use the video's unique details (crowds, weather, specific sights) to stand out],
-  "descriptionEn": ${languageOutput !== "jp" ? '"SEO description in English. First 2 sentences: weave ALL major keywords (location, activity, year, format) into natural, readable prose — this is what YouTube indexes. Then: Main body describing what viewers will see, the atmosphere, and context. Write like a human, not an algorithm. NEVER use pipe-separated keyword lists (e.g. Tokyo | Walking | Sakura) — they look spammy and hurt credibility. 150-250 words total."' : '""'},
-  "descriptionJp": ${languageOutput !== "en" ? '"SEO description in Japanese — same structure as English but written natively for JP YouTube audience, not translated. First 2 sentences are the hook with keywords woven in naturally. No pipe-separated keyword lists. 150-250 words."' : '""'},
+  "descriptionEn": ${languageOutput !== "jp" ? (languageOutput === "en+jp" ? '"English section of a bilingual YouTube description. Start with a 1-2 sentence bilingual hook: English sentence first, then its Japanese equivalent on the same line or next line. Then the English body: what viewers will see, the atmosphere, context, with keywords woven naturally into prose. End this section with a divider line (---). 100-150 words for the English portion."' : '"SEO description in English. First 2 sentences: weave ALL major keywords (location, activity, year, format) into natural, readable prose — this is what YouTube indexes. Then: Main body describing what viewers will see, the atmosphere, and context. Write like a human, not an algorithm. NEVER use pipe-separated keyword lists. 150-250 words total."') : '""'},
+  "descriptionJp": ${languageOutput !== "en" ? (languageOutput === "en+jp" ? '"Japanese section that continues after the English section. Written natively for JP YouTube audience, NOT translated from the English above. Include the location, atmosphere, and what to expect. Keywords woven naturally. 80-120 words. This goes below the --- divider from descriptionEn."' : '"SEO description in Japanese — written natively for JP YouTube audience, not translated. First 2 sentences are the hook with keywords woven in naturally. No pipe-separated keyword lists. 150-250 words."') : '""'},
   "hashtags": [exactly 3 hashtags with # prefix, highest-impact searchable terms],
   "tags": [${tagCount} tags — include BOTH English and Japanese for each location/term (e.g. "shibuya", "渋谷"). Lead with long-tail keywords. Include alternate romanizations. No # prefix],
   "thumbnailTexts": [3 short punchy text overlay suggestions for the thumbnail — 2-4 words max each, ALL CAPS, no emojis. Designed to be readable at small size in a bold clean font. Let the video footage speak visually.],
@@ -276,13 +278,15 @@ export function formatMetadataBlock(result: PipelineResult): string {
     });
   }
 
-  if (result.descriptionEn) {
-    lines.push("", "### Description (EN)");
+  if (result.descriptionEn && result.descriptionJp) {
+    lines.push("", "### Description");
     lines.push(result.descriptionEn);
-  }
-
-  if (result.descriptionJp) {
-    lines.push("", "### Description (JP)");
+    lines.push("", result.descriptionJp);
+  } else if (result.descriptionEn) {
+    lines.push("", "### Description");
+    lines.push(result.descriptionEn);
+  } else if (result.descriptionJp) {
+    lines.push("", "### Description");
     lines.push(result.descriptionJp);
   }
 
